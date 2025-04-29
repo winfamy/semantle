@@ -21,7 +21,7 @@ let secretWords = [];
 let sorting = "similarity";  // chrono, alpha, similarity
 let sort_forward = 1;
 let darkModeMql = window.matchMedia('(prefers-color-scheme: dark)');
-let darkMode = false;
+let darkMode = true;
 let handleStats = false;  // not implemented
 
 
@@ -33,7 +33,7 @@ function init() {
     });
 
     if (!storage.getItem("readRules")) {
-        openRules();
+	    // openRules();
     }
 
     document.querySelectorAll(".dialog-underlay, .dialog-close, #capitalized-link").forEach((el) => {
@@ -63,8 +63,9 @@ function init() {
     }
 
     // show the warning
-    document.body.classList.add('dialog-open', 'warning-open');
-    $("#warning-close").focus();
+    // document.body.classList.add('dialog-open', 'warning-open');
+    // $("#warning-close").focus();
+    download();
 }
 
 // download the data
@@ -93,11 +94,17 @@ let similarityStory = null;
 
 function startGame() {
     gameOver = false;
-    secret = secretWords[Math.floor(Math.random() * secretWords.length)];
+	try {
+    let today = new Date();
+    let myrng = new Math.seedrandom(today.toLocaleDateString('en-US') + '1');
+    let secretNumber = Math.abs(myrng.int32());
+    let secretIndex = secretNumber % secretWords.length;
+    secret = secretWords[secretIndex];
     window.secret = secret;  // for debugging
     guesses = {};
     latestGuess = null;
     similarityStory = model.getSimilarityStory(secret);
+	} catch(err) { alert(err.message); alert(err.lineNumber); alert(err.stack); }
     $('#similarity-story').innerHTML =
         `The nearest word has a similarity of <b>${(similarityStory.top * 100).toFixed(2)}</b>,
         the tenth-nearest has a similarity of ${(similarityStory.top10 * 100).toFixed(2)}, and the
